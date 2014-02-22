@@ -3,13 +3,13 @@
 __PocketMine Plugin__
 name=AliasCommand
 description=Custom alias
-version=1.1
+version=1.2
 author=kgdwhsk
 class=AliasCommand
 apiversion=11,12
 */
 class AliasCommand implements Plugin{
-	private $api;
+	private $api ,$list;
 	public function __construct(ServerAPI $api, $server = false)
 	{	
 		$this->api = $api;
@@ -18,7 +18,9 @@ class AliasCommand implements Plugin{
 	public function init()
 	{
 		$this->api->console->register("addalias", "[command] [custom alias]", array($this, "commandHandler"));
+		$this->api->console->register("aliaslist", "List command alias", array($this, "list"));
 		$this->api->console->alias("aa", "addalias");
+		$this->api->console->alias("al", "aliaslist");
 		//$this->path = $this->api->plugin->configPath($this);
 		//$this->msgs = $this->api->plugin->readYAML($this->path . "chatsend.yml");
 		$this->config = new Config($this->api->plugin->configPath($this)."config.yml", CONFIG_YAML, array());
@@ -121,7 +123,16 @@ class AliasCommand implements Plugin{
 				break;
 		}
 	}
-		
+	
+	public function list($cmd, $params, $issuer, $alias )
+	{
+		$this->list = "---Alias Command List---\n";
+		foreach($this->command as $co => $al)
+		{
+			$this->list .= "Command: $co ---Alias: $al\n";
+		}
+	}
+	
 	public function __destruct(){
 	}
 }
