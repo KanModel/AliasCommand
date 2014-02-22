@@ -3,10 +3,10 @@
 __PocketMine Plugin__
 name=AliasCommand
 description=Custom alias
-version=1.2
+version=1.3
 author=kgdwhsk
 class=AliasCommand
-apiversion=11,12
+apiversion=11,12,13
 */
 class AliasCommand implements Plugin{
 	private $api ,$list;
@@ -18,7 +18,7 @@ class AliasCommand implements Plugin{
 	public function init()
 	{
 		$this->api->console->register("addalias", "[command] [custom alias]", array($this, "commandHandler"));
-		$this->api->console->register("aliaslist", "List command alias", array($this, "list"));
+		$this->api->console->register("aliaslist", "List command alias", array($this, "aliaslist"));
 		$this->api->console->alias("aa", "addalias");
 		$this->api->console->alias("al", "aliaslist");
 		//$this->path = $this->api->plugin->configPath($this);
@@ -69,7 +69,9 @@ class AliasCommand implements Plugin{
 								$pa .= $pab;
 							}
 							$par .= $pa;
-							$this->api->plugin->writeYAML($this->path."config.yml",array($par => $params[$la]));
+							$dat = array($par => $params[$la]);
+							$this->overwriteConfig($dat);
+							//$this->api->plugin->writeYAML($this->path."config.yml",array($par => $params[$la]));
 							$this->init();
 							return "Set command ".$par." with alias ".$params[$la]." succeed !";
 						}
@@ -124,13 +126,22 @@ class AliasCommand implements Plugin{
 		}
 	}
 	
-	public function list($cmd, $params, $issuer, $alias )
+	private function overwriteConfig($dat)
+	{
+		$cfg = array();
+		$cfg = $this->api->plugin->readYAML($this->path . "config.yml");
+		$result = array_merge($cfg, $dat);
+		$this->api->plugin->writeYAML($this->path."config.yml", $result);
+	}
+	
+	public function aliaslist($cmd, $params, $issuer, $alias )
 	{
 		$this->list = "---Alias Command List---\n";
 		foreach($this->command as $co => $al)
 		{
 			$this->list .= "Command: $co ---Alias: $al\n";
 		}
+		return $this->list;
 	}
 	
 	public function __destruct(){
