@@ -3,13 +3,14 @@
 __PocketMine Plugin__
 name=AliasCommand
 description=Custom alias
-version=1.3
+version=1.4
 author=kgdwhsk
 class=AliasCommand
 apiversion=11,12,13
 */
 class AliasCommand implements Plugin{
 	private $api ,$list;
+	//public $prefix = "[AC]";
 	public function __construct(ServerAPI $api, $server = false)
 	{	
 		$this->api = $api;
@@ -19,8 +20,10 @@ class AliasCommand implements Plugin{
 	{
 		$this->api->console->register("addalias", "[command] [custom alias]", array($this, "commandHandler"));
 		$this->api->console->register("aliaslist", "List command alias", array($this, "aliaslist"));
+		$this->api->console->register("aliasdelete", "c/ca [command/custom alias]", array($this, "aliasdelete"));
 		$this->api->console->alias("aa", "addalias");
 		$this->api->console->alias("al", "aliaslist");
+		$this->api->console->alias("ad", "aliasdelete");
 		//$this->path = $this->api->plugin->configPath($this);
 		//$this->msgs = $this->api->plugin->readYAML($this->path . "chatsend.yml");
 		$this->config = new Config($this->api->plugin->configPath($this)."config.yml", CONFIG_YAML, array());
@@ -31,7 +34,70 @@ class AliasCommand implements Plugin{
 			$this->api->console->alias("$al", "$co");
 		}
 	}
-		
+	
+	public function aliasdelete($cmd, $params, $issuer, $alias )
+	{
+		if(isset($params[0]))
+		{
+			switch($params[0])
+			{
+				case "c":
+					if(isset($params[1]))
+					{
+						if(array_key_exists(($params[1]) ,$this->command))
+						{
+							unset($this->command[$params[1]]);
+							$this->api->plugin->writeYAML($this->path."config.yml",$this->command);
+							$this->init();
+							return "$params[1] is already delete.";
+						}
+						else
+						{
+							return "Not found $params[1]";
+						}
+					}
+					else
+					{
+					return "Please enter command";
+					}
+				case "ca":
+					if(isset($params[1]))
+					{
+						if(array_search($params[1] ,$this->command))
+						{
+							$ke = array_search($params[1] ,$this->command);
+							unset($this->command[$ke]);
+							$this->api->plugin->writeYAML($this->path."config.yml",$this->command);
+							/*foreach($this->command as $k=>$v)
+							{
+								if($k == $params[1])
+								{
+									unset($arr[$K]);
+									//unset($k);
+								}
+							}*/
+							$this->init();
+							return "$params[1] is already delete.";
+						}
+						else
+						{
+							return "Not found $params[1]";
+						}
+					}
+					else
+					{
+					return "Please enter alias command";
+					}
+				default:
+					return "Please enter c/ca.";
+			}
+		}
+		else
+		{
+			return "Please enter c/ca.";
+		}
+	}	
+	
 	function commandHandler($cmd, $params, $issuer, $alias )
 	{
 		switch($cmd)
@@ -128,9 +194,9 @@ class AliasCommand implements Plugin{
 	
 	private function overwriteConfig($dat)
 	{
-		$cfg = array();
-		$cfg = $this->api->plugin->readYAML($this->path . "config.yml");
-		$result = array_merge($cfg, $dat);
+		//$cfg = array();
+		//$cfg = $this->api->plugin->readYAML($this->path."config.yml");
+		$result = array_merge($this->command, $dat);
 		$this->api->plugin->writeYAML($this->path."config.yml", $result);
 	}
 	
