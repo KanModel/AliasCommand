@@ -3,7 +3,7 @@
 __PocketMine Plugin__
 name=AliasCommand
 description=Custom alias
-version=1.4
+version=1.5
 author=kgdwhsk
 class=AliasCommand
 apiversion=11,12,13
@@ -44,16 +44,25 @@ class AliasCommand implements Plugin{
 				case "c":
 					if(isset($params[1]))
 					{
-						if(array_key_exists(($params[1]) ,$this->command))
+						if(count($params) > 2)
 						{
-							unset($this->command[$params[1]]);
+							$geshu = count($params);
+							$com = $params[1];
+							for($i = 2;$i < $geshu;$i++)
+							{
+								$com .= " $params[$i]";
+							}
+						}
+						if(array_key_exists($com ,$this->command))
+						{
+							unset($this->command[$com]);
 							$this->api->plugin->writeYAML($this->path."config.yml",$this->command);
 							$this->init();
-							return "$params[1] is already delete.";
+							return "$com is already delete.";
 						}
 						else
 						{
-							return "Not found $params[1]";
+							return "Not found $com";
 						}
 					}
 					else
@@ -111,7 +120,9 @@ class AliasCommand implements Plugin{
 						if(count($params) === 2)
 						{
 							//$cm = array($params[0] => $params[1]);
-							$this->api->plugin->writeYAML($this->path."config.yml",array($params[0] => $params[1]));
+							//$this->api->plugin->writeYAML($this->path."config.yml",array($params[0] => $params[1]));
+							$dat = array($params[0] => $params[1]);
+							$this->overwriteConfig($dat);
 							$this->init();
 							//$len = count($params);
 							return "Set command ".$params[0]." with alias ".$params[1]." succeed !";
